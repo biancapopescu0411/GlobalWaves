@@ -1,14 +1,19 @@
 package app.audio;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 
 /**
  * The type Library entry.
  */
-@Getter
+@Getter@Setter
 public abstract class LibraryEntry {
+    public final String getName() {
+        return name;
+    }
+
     private final String name;
 
     /**

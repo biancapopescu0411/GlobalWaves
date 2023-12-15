@@ -27,4 +27,18 @@ public final class CheckerConstants {
     public static final int FIVE_POINTS = 5;
     public static final int ZERO_POINTS = 0;
     public static final int LEN_LONGEST_TEST_NAME = 45;
+    public static final int MAX_SIZE = 5;
+    public static final int DAYS_IN_MONTH = 31;
+    public static final int MONTHS_IN_YEAR = 12;
+    public static final int INFERIOR_YEAR = 1900;
+    public static final int SUPERIOR_YEAR = 2023;
+    public static final int FEBRUARY = 2;
+    public static final int MAX_DAYS_IN_FEBRUARY = 28;
+    public static final int PARSE_DATE_DAY_START = 0;
+    public static final int PARSE_DATE_DAY_END = 2;
+    public static final int PARSE_DATE_MONTH_START = 3;
+    public static final int PARSE_DATE_MONTH_END = 5;
+    public static final int PARSE_DATE_YEAR_START = 6;
+    public static final int PARSE_DATE_YEAR_END = 10;
+
 }
