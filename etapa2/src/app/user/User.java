@@ -1,5 +1,6 @@
 package app.user;
 
+import app.Admin;
 import app.audio.Collections.AudioCollection;
 import app.audio.Collections.Playlist;
 import app.audio.Collections.PlaylistOutput;
@@ -11,7 +12,9 @@ import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.searchBar.SearchBar;
 import app.utils.Enums;
+import fileio.input.CommandInput;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,22 +22,16 @@ import java.util.List;
 /**
  * The type User.
  */
-public class User {
-    @Getter
-    private String username;
-    @Getter
-    private int age;
-    @Getter
-    private String city;
-    @Getter
+@Getter@Setter
+public final class User extends UserEntry {
     private ArrayList<Playlist> playlists;
-    @Getter
+    private Enums.CurrentPage currentPage;
     private ArrayList<Song> likedSongs;
-    @Getter
     private ArrayList<Playlist> followedPlaylists;
     private final Player player;
     private final SearchBar searchBar;
     private boolean lastSearched;
+    private Enums.ConnectionStatus status;
 
     /**
      * Instantiates a new User.
@@ -44,15 +41,16 @@ public class User {
      * @param city     the city
      */
     public User(final String username, final int age, final String city) {
-        this.username = username;
-        this.age = age;
-        this.city = city;
+        super(username, age, city);
         playlists = new ArrayList<>();
         likedSongs = new ArrayList<>();
         followedPlaylists = new ArrayList<>();
         player = new Player();
         searchBar = new SearchBar(username);
         lastSearched = false;
+        status = Enums.ConnectionStatus.ONLINE;
+        currentPage = Enums.CurrentPage.HOME_PAGE;
+        setUserType(Enums.UserType.USER);
     }
 
     /**
@@ -67,12 +65,24 @@ public class User {
         player.stop();
 
         lastSearched = true;
-        ArrayList<String> results = new ArrayList<>();
-        List<LibraryEntry> libraryEntries = searchBar.search(filters, type);
 
-        for (LibraryEntry libraryEntry : libraryEntries) {
-            results.add(libraryEntry.getName());
+        ArrayList<String> results = new ArrayList<>();
+
+        if (type.equals("song") || type.equals("podcast") || type.equals("playlist")
+                || type.equals("album")) {
+            List<LibraryEntry> libraryEntries = searchBar.searchLibrary(filters, type);
+
+            for (LibraryEntry libraryEntry : libraryEntries) {
+                results.add(libraryEntry.getName());
+            }
+        } else {
+            List<UserEntry> userEntries = searchBar.searchUser(filters, type);
+
+            for (UserEntry userEntry : userEntries) {
+                results.add(userEntry.getUsername());
+            }
         }
+
         return results;
     }
 
@@ -89,13 +99,34 @@ public class User {
 
         lastSearched = false;
 
-        LibraryEntry selected = searchBar.select(itemNumber);
+        if (searchBar.getLastSearchType() != null && (searchBar.getLastSearchType().equals("song")
+                || searchBar.getLastSearchType().equals("podcast")
+                || searchBar.getLastSearchType().equals("playlist")
+                || searchBar.getLastSearchType().equals("album"))) {
+            LibraryEntry selected = searchBar.selectLibrary(itemNumber);
 
-        if (selected == null) {
-            return "The selected ID is too high.";
+            if (selected == null) {
+                return "The selected ID is too high.";
+            }
+
+            return "Successfully selected %s.".formatted(selected.getName());
+        } else {
+            UserEntry selected = searchBar.selectUser(itemNumber);
+
+            if (selected == null) {
+                return "The selected ID is too high.";
+            }
+
+            if (searchBar.getLastSearchTypeUser().equals("artist")) {
+                currentPage = Enums.CurrentPage.ARTIST_PAGE;
+                searchBar.setLastSearchTypeUser(null);
+            } else {
+                currentPage = Enums.CurrentPage.HOST_PAGE;
+                searchBar.setLastSearchTypeUser(null);
+            }
+
+            return "Successfully selected %s's page.".formatted(selected.getUsername());
         }
-
-        return "Successfully selected %s.".formatted(selected.getName());
     }
 
     /**
@@ -188,8 +219,8 @@ public class User {
             return "Please load a source before using the shuffle function.";
         }
 
-        if (!player.getType().equals("playlist")) {
-            return "The loaded source is not a playlist.";
+        if (!player.getType().equals("playlist") && !player.getType().equals("album")) {
+            return "The loaded source is not a playlist or an album.";
         }
 
         player.shuffle(seed);
@@ -248,7 +279,8 @@ public class User {
             return "Please load a source before liking or unliking.";
         }
 
-        if (!player.getType().equals("song") && !player.getType().equals("playlist")) {
+        if (!player.getType().equals("song") && !player.getType().equals("playlist")
+                && !player.getType().equals("album")) {
             return "Loaded source is not a song.";
         }
 
@@ -314,7 +346,7 @@ public class User {
             return "A playlist with the same name already exists.";
         }
 
-        playlists.add(new Playlist(name, username, timestamp));
+        playlists.add(new Playlist(name, getUsername(), timestamp));
 
         return "Playlist created successfully.";
     }
@@ -403,7 +435,7 @@ public class User {
 
         Playlist playlist = (Playlist) selection;
 
-        if (playlist.getOwner().equals(username)) {
+        if (playlist.getOwner().equals(getUsername())) {
             return "You cannot follow or unfollow your own playlist.";
         }
 
@@ -478,6 +510,51 @@ public class User {
      * @param time the time
      */
     public void simulateTime(final int time) {
-        player.simulatePlayer(time);
+        if (status == Enums.ConnectionStatus.ONLINE) {
+            player.simulatePlayer(time);
+        }
+    }
+
+    /**
+     * Switches the connection status of the provided user between online and offline
+     *
+     * @param user The user whose connection status is to be switched
+     */
+    public static void switchConnectionStatus(final User user) {
+        // check the current connection status of the user
+        if (user.getStatus() == Enums.ConnectionStatus.ONLINE) {
+            // if the user is currently online, switch the status to offline
+            user.setStatus(Enums.ConnectionStatus.OFFLINE);
+        } else {
+            // if the user is currently offline, switch the status to online
+            user.setStatus(Enums.ConnectionStatus.ONLINE);
+        }
+    }
+
+    /**
+     * Switches the connection status of a normal user based on the provided CommandInput
+     *
+     * @param commandInput The input containing the username of the user whose status is
+     *                     to be switched
+     * @return A status message indicating the result of the status switch
+     */
+    public static String switchUserStatus(final CommandInput commandInput) {
+        Admin admin = Admin.getInstance();
+        // check if the specified username exists
+        if (!admin.isUser(commandInput.getUsername()) && !admin.isArtist(commandInput.getUsername())
+                && !admin.isHost(commandInput.getUsername())) {
+            return "The username " + commandInput.getUsername() + " doesn't exist.";
+        }
+
+        // check if the specified username belongs to a normal user
+        if (!admin.isUser(commandInput.getUsername())) {
+            return "%s is not a normal user.".formatted(commandInput.getUsername());
+        }
+
+        // switch the connection status of the normal user
+        switchConnectionStatus(admin.getUser(commandInput.getUsername()));
+
+        // return a success message indicating the status switch
+        return "%s has changed status successfully.".formatted(commandInput.getUsername());
     }
 }
