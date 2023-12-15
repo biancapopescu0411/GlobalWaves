@@ -1,5 +1,7 @@
 package fileio.input;
 
+import java.util.ArrayList;
+
 public final class CommandInput {
     private String command;
     private String username;
@@ -11,6 +13,116 @@ public final class CommandInput {
     private Integer playlistId; // pentru add/remove song
     private String playlistName; // pentru create playlist
     private Integer seed; // pentru shuffle
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(final String status) {
+        this.status = status;
+    }
+
+    private String status;
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(final Integer age) {
+        this.age = age;
+    }
+
+    private Integer age;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(final String city) {
+        this.city = city;
+    }
+
+    private String city;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    private String name;
+
+    public ArrayList<EpisodeInput> getEpisodes() {
+        return episodes;
+    }
+
+    public void setEpisodes(final ArrayList<EpisodeInput> episodes) {
+        this.episodes = episodes;
+    }
+
+    private ArrayList<EpisodeInput> episodes;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    private String description;
+
+    public String getReleaseYear() {
+        return releaseYear;
+    }
+
+    public void setReleaseYear(final String releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+
+    private String releaseYear;
+
+    public ArrayList<SongInput> getSongs() {
+        return songs;
+    }
+
+    public void setSongs(final ArrayList<SongInput> songs) {
+        this.songs = songs;
+    }
+
+    private ArrayList<SongInput> songs;
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(final String date) {
+        this.date = date;
+    }
+
+    private String date;
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(final Integer price) {
+        this.price = price;
+    }
+
+    private Integer price;
+
+    public String getNextPage() {
+        return nextPage;
+    }
+
+    public void setNextPage(final String nextPage) {
+        this.nextPage = nextPage;
+    }
+
+    private String nextPage;
 
     public CommandInput() {
     }
