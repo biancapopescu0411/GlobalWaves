@@ -1,7 +1,5 @@
 # Proiect GlobalWaves  - Etapa 2
 
-<div align="center"><img src="https://tenor.com/en-GB/view/tom-and-jerry-tom-the-cat-phew-relieved-sigh-gif-17213206.gif" width="400px"></div>
-
 This is the second phase of the **GlobalWaves** project. The project is a music streaming
 service, similar to Spotify. The project is written in Java and uses the JSON.simple library to
 parse the input files.
@@ -65,12 +63,6 @@ parse the input files.
       * Test - run the main method from Test class with the name of the input file from the
     command line and the result will be written
       to the out.txt file. Thus, you can compare this result with ref.
-
-## Generative AI
-
-I used GitHub Copilot for some of the comments and javadocs, and for some of the methods that
-were very similar, but I had to change them a bit to fit my needs(isUser, isArtist, isHost,
-printArtistPage, printLikedContentPage etc.).
 
 ## Description
 
